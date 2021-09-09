@@ -71,7 +71,17 @@ class NovoIngredienteControllerTest {
 
     }
 
+    @Test
+    void naoDeveCadastrarIngredienteSemNome() throws Exception {
 
+        NovoIngredienteRequest body = new NovoIngredienteRequest("", new BigDecimal("2.0"), 200);
+        MockHttpServletRequestBuilder request = post("/api/ingredientes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(body));
+
+        mvc.perform(request)
+                .andExpect(status().isBadRequest());
+    }
 
 
 }

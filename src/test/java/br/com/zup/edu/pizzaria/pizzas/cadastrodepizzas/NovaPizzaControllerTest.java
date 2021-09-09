@@ -6,6 +6,7 @@ import br.com.zup.edu.pizzaria.pizzas.cadastropizza.NovaPizzaRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,21 +37,27 @@ public class NovaPizzaControllerTest {
     @Autowired
     private IngredienteRepository ingredienteRepository;
 
-    @Test
-    void deveCadastrarNovaPizza() throws Exception {
+    private Ingrediente ingrediente1;
+    private Ingrediente ingrediente2;
 
-        Ingrediente ingrediente1 = new Ingrediente(
+    @BeforeEach
+    void setUp() {
+        ingrediente1 = new Ingrediente(
                 "cenoura",
                 12,
                 new BigDecimal("20.00"));
 
-        Ingrediente ingrediente2 = new Ingrediente(
+        ingrediente2 = new Ingrediente(
                 "frango",
                 13,
                 new BigDecimal("17.00"));
 
         ingredienteRepository.save(ingrediente1);
         ingredienteRepository.save(ingrediente2);
+    }
+
+    @Test
+    void deveCadastrarNovaPizza() throws Exception {
 
         NovaPizzaRequest body = new NovaPizzaRequest(
                 "Mussarela",
@@ -75,6 +82,15 @@ public class NovaPizzaControllerTest {
     void naoDeveCadastrarPizzaComIngredienteInvalido() throws Exception{
         NovaPizzaRequest body = new NovaPizzaRequest(
                 "Mussarela", Arrays.asList(6L));
+        MockHttpServletRequestBuilder request = postRequest("/api/pizzas", body);
+        mvc.perform(request)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void naoDeveCadastrarPizzaSemSabor() throws Exception{
+        NovaPizzaRequest body = new NovaPizzaRequest(
+                "", Arrays.asList(ingrediente1.getId(), ingrediente2.getId()));
         MockHttpServletRequestBuilder request = postRequest("/api/pizzas", body);
         mvc.perform(request)
                 .andExpect(status().is4xxClientError());
